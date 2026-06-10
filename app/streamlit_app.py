@@ -104,9 +104,18 @@ def apply_theme() -> None:
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 0.75rem 0.85rem;
+            color: #1a202c;
         }
-        [data-testid="stMetricLabel"] {
+        [data-testid="stMetricLabel"],
+        [data-testid="stMetricValue"],
+        [data-testid="stMetricDelta"] {
             color: #4a5568;
+        }
+        [data-testid="stMetricValue"] {
+            color: #1a202c;
+        }
+        [data-testid="stDataFrame"] {
+            color: #1a202c;
         }
         h1, h2, h3 {
             letter-spacing: 0;
@@ -118,19 +127,34 @@ def apply_theme() -> None:
 
 
 def discover_datasets(data_dir: Path) -> dict[str, Path]:
-    datasets = {}
-    for path in sorted(data_dir.glob("*.csv"), reverse=True):
+    datasets = []
+    for path in sorted(data_dir.glob("*.csv"), key=dataset_sort_key):
         label = path.name
-        if "_llm" in path.stem:
+        if path.stem == "jumia_reviews_processed_latest":
+            label = f"Production latest - {path.name}"
+        elif "_llm" in path.stem:
             label = f"LLM - {path.name}"
         elif "_rules" in path.stem:
             label = f"Rules - {path.name}"
-        datasets[label] = path
-    return datasets
+        datasets.append((label, path))
+    return dict(datasets)
+
+
+def dataset_sort_key(path: Path) -> tuple[int, str]:
+    if path.stem == "jumia_reviews_processed_latest":
+        return (0, path.name)
+    if "_llm" in path.stem:
+        return (1, path.name)
+    if "_rules" in path.stem:
+        return (2, path.name)
+    return (3, path.name)
 
 
 def preferred_dataset_index(dataset_options: dict[str, Path]) -> int:
     labels = list(dataset_options)
+    for index, label in enumerate(labels):
+        if label.startswith("Production latest"):
+            return index
     for index, label in enumerate(labels):
         if label.startswith("LLM"):
             return index
@@ -368,8 +392,12 @@ def polish_chart(fig: go.Figure, *, x_title: str, y_title: str) -> go.Figure:
         legend_title_text="",
         xaxis_title=x_title,
         yaxis_title=y_title,
-        font=dict(size=13),
-        hoverlabel=dict(bgcolor="white"),
+        font=dict(size=13, color="#2d3748"),
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
+        hoverlabel=dict(bgcolor="#ffffff", font_color="#1a202c"),
+        xaxis=dict(color="#2d3748", gridcolor="#edf2f7", zerolinecolor="#cbd5e0"),
+        yaxis=dict(color="#2d3748", gridcolor="#edf2f7", zerolinecolor="#cbd5e0"),
     )
     for trace in fig.data:
         if trace.type == "bar":

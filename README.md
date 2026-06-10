@@ -62,6 +62,33 @@ cp .env.example .env
 
 Then edit `.env` with your real API key and runtime settings.
 
+## Dataset Workflow
+
+For larger runs, scrape in batches, then build one canonical dataset for the dashboard:
+
+```bash
+.venv/bin/python scripts/build_dataset.py
+```
+
+This writes:
+
+```text
+data/raw/jumia_reviews_raw_master.csv
+data/raw/jumia_reviews_raw_master.json
+```
+
+To also process the master dataset and create the production dashboard file:
+
+```bash
+.venv/bin/python scripts/build_dataset.py --mode llm
+```
+
+The dashboard prefers this file when it exists:
+
+```text
+data/processed/jumia_reviews_processed_latest.csv
+```
+
 ## Phase Status
 
 - Phase 1: Environment and project scaffolding. Done.
