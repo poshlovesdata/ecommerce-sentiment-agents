@@ -67,5 +67,5 @@ Then edit `.env` with your real API key and runtime settings.
 - Phase 1: Environment and project scaffolding. Done.
 - Phase 2: Data collection scraper. Done.
 - Phase 3: Multi-agent NLP pipeline. Done.
-- Phase 4: Streamlit dashboard.
+- Phase 4: Streamlit dashboard. Done.
 - Phase 5: Docker, Compose, and Traefik deployment.
