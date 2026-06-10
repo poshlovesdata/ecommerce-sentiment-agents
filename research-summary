@@ -1,0 +1,65 @@
+Project Blueprint: COSC878 Journal Article
+
+1. Project Identity
+
+Course: COSC878 - Web and Social Media Analytics
+
+Assignment: Research Article Development
+
+Official Title: "An Aspect-Based Multi-Agent Framework for Consumer Behavior Analytics: A Case Study of the Mobile Phone Accessories Market on Jumia Nigeria"
+
+2. The Core Problem
+
+E-commerce platforms in Nigeria (like Jumia) generate massive amounts of consumer feedback. However, standard analytics fall short because:
+
+Star Ratings are Deceptive: A 4-star review might contain critical text about a product breaking after two weeks.
+
+Basic Sentiment Analysis Fails: Traditional tools classify an entire review as simply "Positive" or "Negative." They cannot handle mixed reviews (e.g., "Great battery, but delivery took a month").
+
+Localized Noise: Nigerian reviews contain unique slang, grammatical variations, and specific geographical delivery complaints that standard lexicons struggle to process.
+
+3. The Innovative Solution (Multi-Agent Framework)
+
+Instead of a single, basic sentiment model, this project proposes a Multi-Agent AI Pipeline. Think of it as a team of specialized AI workers analyzing each review:
+
+Agent 1 (The Cleaner/Router): Takes the scraped raw text, cleans it, and identifies the product type (e.g., Power Bank vs. Earbuds).
+
+Agent 2 (The Aspect Extractor): Reads the review and isolates the specific features being discussed (e.g., Battery Life, Build Quality, Delivery Speed, Price).
+
+Agent 3 (The Contextual Classifier): Assigns a specific sentiment score (Positive/Negative/Neutral) to each isolated aspect, accounting for local context.
+
+4. Data Strategy
+
+Target Source: Jumia Nigeria (Verified Customer Feedback sections).
+
+Target Category: Mobile Phone Accessories (specifically high-volume items like Portable Power Banks, Chargers, and Gaming Finger Sleeves).
+
+Why this works: Mobile accessories have highly consistent consumer expectations (it either charges fast/lasts long or it doesn't), making the AI's job highly accurate and focused.
+
+5. Technology Stack & Rubric Alignment
+
+This project is designed to maximize the 55% grading criteria by utilizing multiple required tools:
+
+Data Collection (Web Scraping): Using BeautifulSoup in Python to scrape Jumia review titles, text bodies, star ratings, and dates.
+
+Data Analysis (Machine Learning/AI): Using Python to orchestrate the multi-agent LLM workflow alongside tools like NLTK/VADER for baseline sentiment processing.
+
+Data Presentation (Visualization/Dashboarding): Using Matplotlib or Streamlit to build interactive charts comparing sentiment across different aspects (e.g., showing that Ace Elec power banks have great battery sentiment but poor delivery sentiment).
+
+6. Journal Article Structure (The Roadmap)
+
+Based on your mandatory requirements, the paper will be structured as follows:
+
+Title, Abstract & Keywords: (To be finalized last).
+
+Introduction: (Drafted! Covers background, problem, objectives, and significance).
+
+Literature Review: (Needs to be drafted. Will discuss the limits of traditional sentiment analysis and the rise of aspect-based/agentic AI).
+
+Methodology: Explains the BeautifulSoup scraping script, the multi-agent pipeline, and data cleaning techniques.
+
+Results and Discussion: Showcasing your charts, tables, and what the data reveals about Nigerian consumer behavior.
+
+Conclusion & Recommendations: Summarizing the findings and offering advice to e-commerce vendors based on the data.
+
+References: APA 7th Edition.

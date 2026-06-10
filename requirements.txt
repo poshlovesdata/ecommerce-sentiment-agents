@@ -1,0 +1,28 @@
+# Core data engineering
+pandas>=2.2,<3.0
+numpy>=1.26,<3.0
+pydantic>=2.8,<3.0
+pydantic-settings>=2.4,<3.0
+python-dotenv>=1.0,<2.0
+
+# Web scraping
+beautifulsoup4>=4.12,<5.0
+requests>=2.32,<3.0
+lxml>=5.2,<7.0
+tenacity>=8.5,<10.0
+
+# AI and NLP
+pydantic-ai-slim[openai]>=0.0.53
+langgraph>=0.2,<1.1
+nltk>=3.9,<4.0
+
+# Dashboard and visualization
+streamlit>=1.37,<2.0
+plotly>=5.23,<7.0
+matplotlib>=3.9,<4.0
+
+# Utilities and quality
+loguru>=0.7,<1.0
+rich>=13.7,<15.0
+pytest>=8.3,<9.0
+ruff>=0.6,<1.0
