@@ -114,7 +114,8 @@ docker compose -f deployment/docker-compose.yml up -d dashboard
 
 The VPS must have:
 
-- A cloned repository at `~/projects/jumia-aspect-consumer-analytics`.
+- The GitHub repository: `https://github.com/poshlovesdata/ecommerce-sentiment-agents.git`.
+- A cloned repository on the VPS at `~/projects/ecommerce-sentiment-agents`.
 - A `.env` file based on `.env.example`.
 - An external Docker network named `web`, already attached to Traefik.
 - GitHub Actions secrets named `VPS_IP`, `VPS_USERNAME`, and `VPS_SSH_KEY`.

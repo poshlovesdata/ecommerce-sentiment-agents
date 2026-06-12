@@ -42,7 +42,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -e
-            cd ~/projects/jumia-aspect-consumer-analytics
+            cd ~/projects/ecommerce-sentiment-agents
             git pull origin main
             docker compose -f deployment/docker-compose.yml up -d --build dashboard
             docker image prune -f

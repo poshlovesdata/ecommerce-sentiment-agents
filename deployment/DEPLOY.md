@@ -19,8 +19,8 @@ Clone the repository on the VPS:
 ```bash
 mkdir -p ~/projects
 cd ~/projects
-git clone git@github.com:<your-github-username>/<your-repo-name>.git jumia-aspect-consumer-analytics
-cd jumia-aspect-consumer-analytics
+git clone https://github.com/poshlovesdata/ecommerce-sentiment-agents.git ecommerce-sentiment-agents
+cd ecommerce-sentiment-agents
 ```
 
 Create the production environment file:
