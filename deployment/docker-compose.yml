@@ -40,21 +40,14 @@ services:
       - ../reports:/app/reports
     networks:
       - web
-    command:
-      - python
-      - scripts/scrape_jumia.py
-      - --category-url
-      - ${JUMIA_CATEGORY_URL:-https://www.jumia.com.ng/mobile-accessories/}
-      - --max-pages
-      - ${SCRAPER_MAX_PAGES:-5}
-      - --max-products
-      - ${SCRAPER_MAX_PRODUCTS:-100}
-      - --max-reviews-per-product
-      - ${SCRAPER_MAX_REVIEWS_PER_PRODUCT:-100}
-      - --max-review-pages-per-product
-      - ${SCRAPER_MAX_REVIEW_PAGES_PER_PRODUCT:-10}
-      - --min-listing-review-count
-      - ${SCRAPER_MIN_LISTING_REVIEW_COUNT:-1}
+    command: >
+      sh -c 'python scripts/scrape_jumia.py
+      --category-url "$${JUMIA_CATEGORY_URL:-https://www.jumia.com.ng/mobile-accessories/}"
+      --max-pages "$${SCRAPER_MAX_PAGES:-5}"
+      --max-products "$${SCRAPER_MAX_PRODUCTS:-100}"
+      --max-reviews-per-product "$${SCRAPER_MAX_REVIEWS_PER_PRODUCT:-100}"
+      --max-review-pages-per-product "$${SCRAPER_MAX_REVIEW_PAGES_PER_PRODUCT:-10}"
+      --min-listing-review-count "$${SCRAPER_MIN_LISTING_REVIEW_COUNT:-1}"'
 
   processor:
     image: jumia-aspect-dashboard:latest
@@ -72,11 +65,8 @@ services:
       - ../reports:/app/reports
     networks:
       - web
-    command:
-      - python
-      - scripts/build_dataset.py
-      - --mode
-      - ${PIPELINE_MODE:-llm}
+    command: >
+      sh -c 'python scripts/build_dataset.py --mode "$${PIPELINE_MODE:-llm}"'
 
 networks:
   web:
