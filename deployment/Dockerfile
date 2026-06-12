@@ -4,6 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PYTHONPATH=/app/src \
+    NLTK_DATA=/usr/local/share/nltk_data \
     STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
     STREAMLIT_SERVER_PORT=8501
 
@@ -15,7 +16,8 @@ RUN apt-get update \
 
 COPY requirements.txt ./
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt \
+    && python -m nltk.downloader -d /usr/local/share/nltk_data vader_lexicon
 
 COPY . .
 
