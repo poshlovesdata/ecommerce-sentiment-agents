@@ -89,10 +89,40 @@ The dashboard prefers this file when it exists:
 data/processed/jumia_reviews_processed_latest.csv
 ```
 
+## Deployment Workflow
+
+Production is designed around this flow:
+
+```text
+local -> GitHub main -> GitHub Actions -> VPS git pull -> Docker Compose rebuild -> Traefik -> dashboard.poshlovesdata.dev
+```
+
+The dashboard is the long-running web service:
+
+```bash
+docker compose -f deployment/docker-compose.yml up -d --build dashboard
+```
+
+Large data refreshes run as one-off jobs on the VPS, using the same image and shared `data/`
+directory:
+
+```bash
+docker compose -f deployment/docker-compose.yml run --rm scraper
+docker compose -f deployment/docker-compose.yml run --rm processor
+docker compose -f deployment/docker-compose.yml up -d dashboard
+```
+
+The VPS must have:
+
+- A cloned repository at `~/projects/jumia-aspect-consumer-analytics`.
+- A `.env` file based on `.env.example`.
+- An external Docker network named `web`, already attached to Traefik.
+- GitHub Actions secrets named `VPS_IP`, `VPS_USERNAME`, and `VPS_SSH_KEY`.
+
 ## Phase Status
 
 - Phase 1: Environment and project scaffolding. Done.
 - Phase 2: Data collection scraper. Done.
 - Phase 3: Multi-agent NLP pipeline. Done.
 - Phase 4: Streamlit dashboard. Done.
-- Phase 5: Docker, Compose, and Traefik deployment.
+- Phase 5: Docker, Compose, Traefik, and GitHub Actions deployment. In progress.

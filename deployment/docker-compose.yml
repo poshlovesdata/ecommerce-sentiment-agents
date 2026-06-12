@@ -1,13 +1,83 @@
-# Phase 5 will finalize Traefik labels and production service settings.
 services:
   dashboard:
+    image: jumia-aspect-dashboard:latest
     build:
       context: ..
       dockerfile: deployment/Dockerfile
+    container_name: jumia-aspect-dashboard
+    restart: unless-stopped
     env_file:
       - ../.env
-    ports:
-      - "8501:8501"
+    environment:
+      PYTHONPATH: /app/src
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      STREAMLIT_SERVER_PORT: 8501
     volumes:
       - ../data:/app/data
       - ../reports:/app/reports
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jumia-dashboard.rule=Host(`dashboard.poshlovesdata.dev`)"
+      - "traefik.http.routers.jumia-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.jumia-dashboard.tls.certresolver=myresolver"
+      - "traefik.http.services.jumia-dashboard.loadbalancer.server.port=8501"
+
+  scraper:
+    image: jumia-aspect-dashboard:latest
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    profiles:
+      - jobs
+    env_file:
+      - ../.env
+    environment:
+      PYTHONPATH: /app/src
+    volumes:
+      - ../data:/app/data
+      - ../reports:/app/reports
+    networks:
+      - web
+    command:
+      - python
+      - scripts/scrape_jumia.py
+      - --category-url
+      - ${JUMIA_CATEGORY_URL:-https://www.jumia.com.ng/mobile-accessories/}
+      - --max-pages
+      - ${SCRAPER_MAX_PAGES:-5}
+      - --max-products
+      - ${SCRAPER_MAX_PRODUCTS:-100}
+      - --max-reviews-per-product
+      - ${SCRAPER_MAX_REVIEWS_PER_PRODUCT:-100}
+      - --max-review-pages-per-product
+      - ${SCRAPER_MAX_REVIEW_PAGES_PER_PRODUCT:-10}
+      - --min-listing-review-count
+      - ${SCRAPER_MIN_LISTING_REVIEW_COUNT:-1}
+
+  processor:
+    image: jumia-aspect-dashboard:latest
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    profiles:
+      - jobs
+    env_file:
+      - ../.env
+    environment:
+      PYTHONPATH: /app/src
+    volumes:
+      - ../data:/app/data
+      - ../reports:/app/reports
+    networks:
+      - web
+    command:
+      - python
+      - scripts/build_dataset.py
+      - --mode
+      - ${PIPELINE_MODE:-llm}
+
+networks:
+  web:
+    external: true

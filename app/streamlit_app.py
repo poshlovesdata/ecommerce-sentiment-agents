@@ -392,12 +392,6 @@ def polish_chart(fig: go.Figure, *, x_title: str, y_title: str) -> go.Figure:
         legend_title_text="",
         xaxis_title=x_title,
         yaxis_title=y_title,
-        font=dict(size=13, color="#2d3748"),
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        hoverlabel=dict(bgcolor="#ffffff", font_color="#1a202c"),
-        xaxis=dict(color="#2d3748", gridcolor="#edf2f7", zerolinecolor="#cbd5e0"),
-        yaxis=dict(color="#2d3748", gridcolor="#edf2f7", zerolinecolor="#cbd5e0"),
     )
     for trace in fig.data:
         if trace.type == "bar":

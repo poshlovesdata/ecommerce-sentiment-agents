@@ -28,3 +28,8 @@ reports/figures/*
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Paper support drafts
+METHODOLOGY_NOTES.md
+PROJECT_TRACKER.md
+TECHNICAL_README.md
