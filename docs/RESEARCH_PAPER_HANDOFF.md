@@ -14,6 +14,12 @@ This document gives a paper-writing agent enough context to write the full resea
 
 The paper should be written as a research article for a Web and Social Media Analytics course, not as a software manual. The implementation exists to support the methodology, results, and reproducibility claims.
 
+For paper-ready findings from the deployed dashboard, read:
+
+```text
+docs/RESULTS_ANALYSIS.md
+```
+
 ## Research Problem
 
 E-commerce platforms generate large volumes of consumer feedback through product reviews, ratings, and seller interactions. However, traditional analytics methods often reduce this feedback to aggregate star ratings or whole-review sentiment scores, which can obscure the specific product and service aspects shaping consumer satisfaction.
@@ -190,6 +196,17 @@ python scripts/merge_processed.py --publish-latest
 ```
 
 This preserves the `pipeline_mode` column, allowing the dashboard to show both broad deterministic rules results and a smaller LLM sample in one "Production latest" file.
+
+For a stronger LLM sample, use a stratified raw-review sample instead of the first rows of the master dataset:
+
+```bash
+python scripts/sample_raw_reviews.py --sample-size 300
+python scripts/run_pipeline.py \
+  --input data/raw/jumia_reviews_raw_llm_stratified_sample.csv \
+  --mode llm
+```
+
+The sampler spreads reviews across `product_name` and `star_rating` by default, making the LLM subset more useful for paper discussion.
 
 Deduplication:
 
@@ -539,13 +556,14 @@ Priority reading order:
 1. `research-summary`
 2. `README.md`
 3. `docs/RESEARCH_PAPER_HANDOFF.md`
-4. `src/jumia_aspect_agents/data_collection/scraper.py`
-5. `src/jumia_aspect_agents/agents/pipeline.py`
-6. `src/jumia_aspect_agents/agents/llm.py`
-7. `src/jumia_aspect_agents/models/nlp.py`
-8. `src/jumia_aspect_agents/analysis/sentiment.py`
-9. `app/streamlit_app.py`
-10. `deployment/DEPLOY.md`
+4. `docs/RESULTS_ANALYSIS.md`
+5. `src/jumia_aspect_agents/data_collection/scraper.py`
+6. `src/jumia_aspect_agents/agents/pipeline.py`
+7. `src/jumia_aspect_agents/agents/llm.py`
+8. `src/jumia_aspect_agents/models/nlp.py`
+9. `src/jumia_aspect_agents/analysis/sentiment.py`
+10. `app/streamlit_app.py`
+11. `deployment/DEPLOY.md`
 
 ## Commands for Reproducing the Workflow
 

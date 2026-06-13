@@ -9,6 +9,7 @@ from jumia_aspect_agents.data_collection.dataset import (
     discover_raw_csv_files,
     latest_processed_csv,
     merge_processed_datasets,
+    sample_raw_reviews,
 )
 
 
@@ -94,5 +95,39 @@ def test_merge_processed_datasets_preserves_pipeline_modes(tmp_path) -> None:
 
     assert len(dataframe) == 2
     assert set(dataframe["pipeline_mode"]) == {"rules", "llm"}
+    assert output_csv.exists()
+    assert output_json.exists()
+
+
+def test_sample_raw_reviews_spreads_across_products_and_ratings(tmp_path) -> None:
+    input_csv = tmp_path / "jumia_reviews_raw_master.csv"
+    rows = []
+    timestamp = datetime.now(timezone.utc).isoformat()
+    for product_index in range(4):
+        for rating in [1, 5]:
+            for review_index in range(3):
+                row = raw_row(
+                    f"Review {product_index}-{rating}-{review_index}",
+                    timestamp,
+                )
+                row["product_name"] = f"Product {product_index}"
+                row["product_url"] = f"https://www.jumia.com.ng/product-{product_index}.html"
+                row["star_rating"] = rating
+                row["reviewer_name"] = f"Reviewer {review_index}"
+                rows.append(row)
+    pd.DataFrame(rows).to_csv(input_csv, index=False)
+
+    sample, output_csv, output_json = sample_raw_reviews(
+        input_csv=input_csv,
+        output_csv=tmp_path / "jumia_reviews_raw_llm_stratified_sample.csv",
+        output_json=tmp_path / "jumia_reviews_raw_llm_stratified_sample.json",
+        sample_size=8,
+        group_columns=["product_name", "star_rating"],
+        random_state=7,
+    )
+
+    assert len(sample) == 8
+    assert sample["product_name"].nunique() == 4
+    assert set(sample["star_rating"]) == {1, 5}
     assert output_csv.exists()
     assert output_json.exists()

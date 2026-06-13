@@ -14,6 +14,7 @@ from jumia_aspect_agents.models.reviews import RawReview
 
 
 RAW_MASTER_STEM = "jumia_reviews_raw_master"
+RAW_LLM_SAMPLE_STEM = "jumia_reviews_raw_llm_stratified_sample"
 PROCESSED_LATEST_STEM = "jumia_reviews_processed_latest"
 PROCESSED_MERGED_STEM = "jumia_reviews_processed_merged"
 
@@ -77,6 +78,74 @@ def build_raw_master_dataset(
         json.dump(deduped.to_dict(orient="records"), file, ensure_ascii=False, indent=2)
 
     return deduped, output_csv, output_json
+
+
+def sample_raw_reviews(
+    *,
+    input_csv: Path,
+    output_csv: Path,
+    output_json: Path,
+    sample_size: int,
+    group_columns: list[str],
+    random_state: int = 42,
+) -> tuple[pd.DataFrame, Path, Path]:
+    """Create a deterministic sample spread across product/rating groups."""
+
+    if sample_size <= 0:
+        raise ValueError("sample_size must be greater than zero.")
+    if not group_columns:
+        raise ValueError("At least one group column must be provided.")
+
+    dataframe = pd.read_csv(input_csv)
+    if dataframe.empty:
+        raise ValueError(f"Input raw dataset is empty: {input_csv}")
+
+    missing_columns = [column for column in group_columns if column not in dataframe.columns]
+    if missing_columns:
+        raise ValueError(f"Missing sample group columns: {', '.join(missing_columns)}")
+
+    dataframe = dataframe.where(pd.notna(dataframe), None)
+    if "review_id" not in dataframe.columns:
+        dataframe["review_id"] = [
+            make_review_id(RawReview.model_validate(row)) for row in records(dataframe)
+        ]
+
+    grouped_frames = []
+    grouped = dataframe.groupby(group_columns, dropna=False, sort=True)
+    for _, group in grouped:
+        shuffled = group.sample(frac=1, random_state=random_state).reset_index(drop=True)
+        grouped_frames.append(shuffled)
+
+    sampled_rows = []
+    max_group_length = max(len(group) for group in grouped_frames)
+    for row_index in range(max_group_length):
+        for group in grouped_frames:
+            if row_index >= len(group):
+                continue
+            sampled_rows.append(group.iloc[row_index])
+            if len(sampled_rows) >= sample_size:
+                break
+        if len(sampled_rows) >= sample_size:
+            break
+
+    sampled = pd.DataFrame(sampled_rows).reset_index(drop=True)
+    before = len(sampled)
+    sampled = sampled.drop_duplicates(subset=["review_id"], keep="first").reset_index(drop=True)
+    after = len(sampled)
+    logger.info(
+        "Sampled {} raw reviews across {} groups; {} remain after review_id dedupe",
+        before,
+        len(grouped_frames),
+        after,
+    )
+
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    sampled.to_csv(output_csv, index=False)
+    with output_json.open("w", encoding="utf-8") as file:
+        json.dump(sampled.to_dict(orient="records"), file, ensure_ascii=False, indent=2)
+
+    return sampled, output_csv, output_json
 
 
 def write_processed_latest(

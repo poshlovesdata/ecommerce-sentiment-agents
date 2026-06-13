@@ -98,6 +98,25 @@ To merge the latest broad `rules` output and limited `llm` output into one dashb
 The merged file preserves `pipeline_mode`, so the dashboard sidebar can filter between `rules`
 and `llm` rows.
 
+For a more representative LLM run, create a stratified raw sample before running the LLM
+pipeline:
+
+```bash
+.venv/bin/python scripts/sample_raw_reviews.py --sample-size 300
+.venv/bin/python scripts/run_pipeline.py \
+  --input data/raw/jumia_reviews_raw_llm_stratified_sample.csv \
+  --mode llm
+```
+
+Then merge the broad rules output and stratified LLM output:
+
+```bash
+.venv/bin/python scripts/merge_processed.py \
+  --input data/processed/jumia_reviews_processed_master_rules.csv \
+  --input data/processed/jumia_reviews_processed_llm_stratified_sample_llm.csv \
+  --publish-latest
+```
+
 ## Deployment Workflow
 
 Production is designed around this flow:
