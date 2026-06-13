@@ -7,6 +7,8 @@ import pandas as pd
 from jumia_aspect_agents.data_collection.dataset import (
     build_raw_master_dataset,
     discover_raw_csv_files,
+    latest_processed_csv,
+    merge_processed_datasets,
 )
 
 
@@ -52,3 +54,45 @@ def test_build_raw_master_dataset_dedupes_reviews(tmp_path) -> None:
     assert output_csv.exists()
     assert output_json.exists()
     assert "review_id" in dataframe.columns
+
+
+def processed_row(pipeline_mode: str, aspect: str) -> dict:
+    return {
+        "review_id": "review-1",
+        "product_name": "Ace Elec Power Bank",
+        "review_date": "09-06-2026",
+        "aspect": aspect,
+        "aspect_category": aspect,
+        "aspect_evidence": aspect.lower(),
+        "pipeline_mode": pipeline_mode,
+        "contextual_sentiment": "positive",
+    }
+
+
+def test_latest_processed_csv_returns_latest_matching_mode(tmp_path) -> None:
+    older = tmp_path / "jumia_reviews_processed_20260610_rules.csv"
+    newer = tmp_path / "jumia_reviews_processed_20260611_rules.csv"
+    other = tmp_path / "jumia_reviews_processed_20260611_llm.csv"
+    latest = tmp_path / "jumia_reviews_processed_latest.csv"
+    for path in [older, newer, other, latest]:
+        pd.DataFrame([processed_row("rules", "Battery life")]).to_csv(path, index=False)
+
+    assert latest_processed_csv(tmp_path, mode="rules") == newer
+
+
+def test_merge_processed_datasets_preserves_pipeline_modes(tmp_path) -> None:
+    rules = tmp_path / "jumia_reviews_processed_master_rules.csv"
+    llm = tmp_path / "jumia_reviews_processed_master_llm.csv"
+    pd.DataFrame([processed_row("rules", "Battery life")]).to_csv(rules, index=False)
+    pd.DataFrame([processed_row("llm", "Battery life")]).to_csv(llm, index=False)
+
+    dataframe, output_csv, output_json = merge_processed_datasets(
+        input_files=[rules, llm],
+        output_csv=tmp_path / "jumia_reviews_processed_merged.csv",
+        output_json=tmp_path / "jumia_reviews_processed_merged.json",
+    )
+
+    assert len(dataframe) == 2
+    assert set(dataframe["pipeline_mode"]) == {"rules", "llm"}
+    assert output_csv.exists()
+    assert output_json.exists()

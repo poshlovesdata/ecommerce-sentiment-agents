@@ -89,6 +89,15 @@ The dashboard prefers this file when it exists:
 data/processed/jumia_reviews_processed_latest.csv
 ```
 
+To merge the latest broad `rules` output and limited `llm` output into one dashboard dataset:
+
+```bash
+.venv/bin/python scripts/merge_processed.py --publish-latest
+```
+
+The merged file preserves `pipeline_mode`, so the dashboard sidebar can filter between `rules`
+and `llm` rows.
+
 ## Deployment Workflow
 
 Production is designed around this flow:

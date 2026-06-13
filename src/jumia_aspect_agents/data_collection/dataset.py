@@ -15,6 +15,7 @@ from jumia_aspect_agents.models.reviews import RawReview
 
 RAW_MASTER_STEM = "jumia_reviews_raw_master"
 PROCESSED_LATEST_STEM = "jumia_reviews_processed_latest"
+PROCESSED_MERGED_STEM = "jumia_reviews_processed_merged"
 
 
 def discover_raw_csv_files(raw_dir: Path) -> list[Path]:
@@ -99,6 +100,79 @@ def write_processed_latest(
             json.dump(dataframe.to_dict(orient="records"), file, ensure_ascii=False, indent=2)
 
     return output_csv, output_json
+
+
+def discover_processed_csv_files(processed_dir: Path, mode: str | None = None) -> list[Path]:
+    """Return timestamped processed CSVs, optionally filtered by pipeline mode."""
+
+    files = [
+        path
+        for path in processed_dir.glob("jumia_reviews_processed_*.csv")
+        if path.stem not in {PROCESSED_LATEST_STEM, PROCESSED_MERGED_STEM}
+    ]
+    if mode is not None:
+        files = [path for path in files if path.stem.endswith(f"_{mode}")]
+    return sorted(files)
+
+
+def latest_processed_csv(processed_dir: Path, mode: str) -> Path:
+    """Return the latest processed CSV for a pipeline mode."""
+
+    files = discover_processed_csv_files(processed_dir, mode=mode)
+    if not files:
+        raise ValueError(f"No processed {mode!r} CSV files were found in {processed_dir}.")
+    return files[-1]
+
+
+def merge_processed_datasets(
+    *,
+    input_files: list[Path],
+    output_csv: Path,
+    output_json: Path,
+) -> tuple[pd.DataFrame, Path, Path]:
+    """Merge processed rules/LLM datasets for dashboard comparison."""
+
+    if not input_files:
+        raise ValueError("No processed CSV files were provided.")
+
+    frames = []
+    for path in input_files:
+        logger.info("Loading processed file {}", path)
+        dataframe = pd.read_csv(path)
+        if dataframe.empty:
+            logger.warning("Skipping processed file with no rows {}", path)
+            continue
+        if "pipeline_mode" not in dataframe.columns:
+            raise ValueError(f"Processed file is missing pipeline_mode column: {path}")
+        frames.append(dataframe)
+
+    if not frames:
+        raise ValueError("No non-empty processed CSV files were available to merge.")
+
+    merged = pd.concat(frames, ignore_index=True)
+    dedupe_columns = [
+        column
+        for column in ["review_id", "pipeline_mode", "aspect", "aspect_category", "aspect_evidence"]
+        if column in merged.columns
+    ]
+    before = len(merged)
+    if dedupe_columns:
+        merged = merged.drop_duplicates(subset=dedupe_columns, keep="last")
+    merged = merged.sort_values(
+        [column for column in ["pipeline_mode", "product_name", "review_date", "aspect"] if column in merged],
+        na_position="last",
+    ).reset_index(drop=True)
+    after = len(merged)
+    logger.info("Merged {} processed rows into {} deduplicated rows", before, after)
+
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    merged.to_csv(output_csv, index=False)
+
+    with output_json.open("w", encoding="utf-8") as file:
+        json.dump(merged.to_dict(orient="records"), file, ensure_ascii=False, indent=2)
+
+    return merged, output_csv, output_json
 
 
 def records(dataframe: pd.DataFrame) -> list[dict]:
