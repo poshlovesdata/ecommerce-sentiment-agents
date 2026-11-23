@@ -208,6 +208,32 @@ python scripts/run_pipeline.py \
 
 The sampler spreads reviews across `product_name` and `star_rating` by default, making the LLM subset more useful for paper discussion.
 
+Current production dataset after the final VPS run:
+
+| Dataset Signal | Value |
+| --- | ---: |
+| Unique reviews | 4,964 |
+| Unique products | 98 |
+| Merged aspect rows | 6,582 |
+| Unique aspects | 59 |
+| Rules aspect rows | 6,207 |
+| LLM stratified sample reviews | 300 |
+| LLM stratified sample products | 61 |
+| LLM stratified aspect rows | 375 |
+
+The production dashboard currently reads:
+
+```text
+data/processed/jumia_reviews_processed_latest.csv
+```
+
+This file merges:
+
+```text
+data/processed/jumia_reviews_processed_master_rules.csv
+data/processed/jumia_reviews_processed_llm_stratified_sample_llm.csv
+```
+
 Deduplication:
 
 - The scraper itself can collect duplicate reviews across repeated runs.
@@ -356,7 +382,18 @@ The paper-writing agent should use the production dashboard or processed CSV to 
 - Examples where one review contains multiple aspect sentiments.
 - VADER vs LLM disagreement patterns.
 
-Important: The exact final numbers depend on the final VPS scrape and processor run. The writer should compute these from `data/processed/jumia_reviews_processed_latest.csv` after the final processor run.
+Current verified dashboard KPIs:
+
+| KPI | Value |
+| --- | ---: |
+| Reviews | 4,964 |
+| Products | 98 |
+| Aspect rows | 6,582 |
+| Aspects | 59 |
+| Average contextual score | 0.33 |
+| Average star rating | 3.7 |
+
+The writer should use `docs/RESULTS_ANALYSIS.md` as the paper-ready results source. If the processor is rerun later, recompute the figures from `data/processed/jumia_reviews_processed_latest.csv`.
 
 ## Deployment and Reproducibility
 
@@ -453,6 +490,7 @@ The paper should acknowledge these honestly:
 7. The analysis reflects available reviews, not all Jumia buyers.
 8. Very short reviews may produce general aspects rather than highly specific aspect categories.
 9. Repeated scraping may collect duplicates in raw files, though the master dataset deduplicates them.
+10. The LLM run uses a 300-review stratified sample rather than processing all 4,964 reviews, mainly to control OpenAI API cost.
 
 ## Suggested Paper Structure
 
@@ -604,6 +642,19 @@ Process with LLM:
 python scripts/build_dataset.py --mode llm
 ```
 
+Recommended paper/evaluation LLM workflow:
+
+```bash
+python scripts/sample_raw_reviews.py --sample-size 300
+python scripts/run_pipeline.py \
+  --input data/raw/jumia_reviews_raw_llm_stratified_sample.csv \
+  --mode llm
+python scripts/merge_processed.py \
+  --input data/processed/jumia_reviews_processed_master_rules.csv \
+  --input data/processed/jumia_reviews_processed_llm_stratified_sample_llm.csv \
+  --publish-latest
+```
+
 Run dashboard:
 
 ```bash
@@ -635,7 +686,7 @@ Implemented:
 
 Final paper-writing task:
 
-- Use the final processed dataset to compute exact results.
+- Use `docs/RESULTS_ANALYSIS.md` for the current exact results from the completed VPS run.
 - Write the article in the required structure.
 - Add APA 7 citations.
 - Include screenshots or exported charts from the dashboard if allowed by the assignment.

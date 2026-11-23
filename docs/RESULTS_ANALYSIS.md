@@ -16,10 +16,10 @@ The deployed dashboard is working and currently presents a merged dataset contai
 
 - 4,964 unique reviews.
 - 98 unique products.
-- 6,320 aspect-level rows.
-- 22 unique aspects.
-- Average contextual sentiment score: 0.35.
-- Average star rating: 3.78 stars.
+- 6,582 aspect-level rows.
+- 59 unique aspects.
+- Average contextual sentiment score: 0.33.
+- Average star rating: 3.73 stars.
 - Review date range: March 27, 2023 to June 12, 2026.
 
 The results support the central argument of the paper: e-commerce review analytics becomes more informative when reviews are decomposed into product/service aspects instead of being treated only as star ratings or whole-review sentiment.
@@ -59,14 +59,14 @@ The merged dataset includes two pipeline modes:
 | Pipeline Mode | Aspect Rows | Unique Reviews | Unique Products | Unique Aspects | Avg Score | Avg Star Rating |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | rules | 6,207 | 4,964 | 98 | 8 | 0.35 | 3.78 |
-| llm | 113 | 100 | 2 | 20 | 0.28 | 4.07 |
+| llm | 375 | 300 | 61 | 59 | -0.01 | 2.98 |
 
 Interpretation:
 
 - The rules pipeline provides the broad quantitative view across nearly the full scraped dataset.
-- The LLM pipeline provides a smaller qualitative/contextual sample.
-- The LLM sample is not yet representative of all products because it covers only 2 products. It should be described as a limited LLM sample, not as the full dataset.
-- The fact that LLM found 20 aspects from 100 reviews while rules found 8 aspects from 4,964 reviews suggests the LLM is more expressive and granular, but also less standardized.
+- The LLM pipeline provides a smaller qualitative/contextual sample that was stratified across product names and star ratings.
+- The LLM sample is still not a full-dataset LLM run, but it is more useful than the earlier first-rows sample because it covers 300 reviews and 61 products.
+- The fact that LLM found 59 aspects from 300 reviews while rules found 8 standardized aspects from 4,964 reviews suggests the LLM is more expressive and granular, but also less standardized.
 
 Recommended paper wording:
 
@@ -78,10 +78,10 @@ Across all merged aspect rows:
 
 | Sentiment | Rows |
 | --- | ---: |
-| positive | 4,466 |
-| negative | 1,110 |
-| neutral | 589 |
-| mixed | 155 |
+| positive | 4,546 |
+| negative | 1,249 |
+| neutral | 601 |
+| mixed | 186 |
 
 The dashboard therefore shows a generally positive review environment, but with meaningful negative and mixed feedback. This is important because average star ratings alone would understate the presence of aspect-specific dissatisfaction.
 
@@ -90,13 +90,13 @@ By pipeline:
 | Pipeline | Positive | Neutral | Mixed | Negative |
 | --- | ---: | ---: | ---: | ---: |
 | rules | 4,398 (70.9%) | 582 (9.4%) | 140 (2.3%) | 1,087 (17.5%) |
-| llm | 68 (60.2%) | 7 (6.2%) | 15 (13.3%) | 23 (20.4%) |
+| llm | 148 (39.5%) | 19 (5.1%) | 46 (12.3%) | 162 (43.2%) |
 
 Interpretation:
 
 - The rules pipeline classifies most aspect rows as positive.
-- The LLM sample produces a higher share of mixed sentiment than rules: 13.3% vs 2.3%.
-- This supports the argument that contextual LLM analysis is better suited to detecting mixed or nuanced review statements.
+- The stratified LLM sample produces a much higher share of negative and mixed sentiment than rules. This is partly because the sampler intentionally includes more low-rating reviews rather than only the first rows in the raw master file.
+- This supports the argument that contextual LLM analysis is better suited to detecting mixed or nuanced review statements, but it should be interpreted as a sampled qualitative comparison rather than a replacement for the full rules run.
 
 ## Most Mentioned Aspects
 
@@ -104,18 +104,18 @@ Top aspect mentions:
 
 | Aspect | Rows |
 | --- | ---: |
-| General product experience | 2,057 |
-| Battery life | 1,344 |
-| Product performance | 959 |
-| Build quality | 778 |
-| Charging speed | 561 |
-| Price value | 335 |
-| Portability | 227 |
-| Delivery speed | 43 |
-| Comfort | 3 |
-| Quality | 1 |
-| Color variety | 1 |
-| Customer service | 1 |
+| General product experience | 2,094 |
+| Battery life | 1,409 |
+| Product performance | 1,017 |
+| Build quality | 782 |
+| Charging speed | 590 |
+| Price value | 352 |
+| Portability | 234 |
+| Delivery speed | 44 |
+| Durability | 6 |
+| Battery | 3 |
+| Stability | 2 |
+| Bass quality | 2 |
 
 Interpretation:
 
@@ -134,21 +134,21 @@ Aspect sentiment summary:
 
 | Aspect | Rows | Positive | Negative | Neutral | Mixed | Avg Score |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| General product experience | 2,057 | 81.5% | 9.5% | 8.3% | 0.7% | 0.488 |
-| Battery life | 1,344 | 58.5% | 23.9% | 11.7% | 6.0% | 0.225 |
-| Product performance | 959 | 69.8% | 20.8% | 7.9% | 1.6% | 0.313 |
-| Build quality | 778 | 67.6% | 25.6% | 3.0% | 3.9% | 0.294 |
-| Charging speed | 561 | 56.3% | 21.9% | 20.1% | 1.6% | 0.186 |
-| Price value | 335 | 88.1% | 6.9% | 3.3% | 1.8% | 0.487 |
-| Portability | 227 | 71.8% | 16.7% | 11.0% | 0.4% | 0.313 |
-| Delivery speed | 43 | 58.1% | 11.6% | 30.2% | 0.0% | 0.258 |
+| General product experience | 2,094 | 80.6% | 9.9% | 8.5% | 0.9% | 0.480 |
+| Battery life | 1,409 | 56.8% | 25.8% | 11.1% | 6.2% | 0.201 |
+| Product performance | 1,017 | 67.2% | 22.4% | 7.7% | 2.8% | 0.287 |
+| Build quality | 782 | 67.8% | 26.0% | 2.8% | 3.5% | 0.292 |
+| Charging speed | 590 | 56.1% | 23.1% | 19.3% | 1.5% | 0.180 |
+| Price value | 352 | 88.1% | 6.8% | 3.4% | 1.7% | 0.485 |
+| Portability | 234 | 71.8% | 16.2% | 10.7% | 1.3% | 0.316 |
+| Delivery speed | 44 | 56.8% | 13.6% | 29.5% | 0.0% | 0.241 |
 
 Interpretation:
 
 - Price value is the most positive major aspect, with 88.1% positive sentiment.
-- Battery life has high volume but also substantial dissatisfaction: 23.9% negative and 6.0% mixed.
-- Build quality shows the highest negative share among major aspects: 25.6%.
-- Charging speed has the lowest average score among major aspects at 0.186, with a relatively high neutral share.
+- Battery life has high volume but also substantial dissatisfaction: 25.8% negative and 6.2% mixed.
+- Build quality shows the highest negative share among major aspects: 26.0%.
+- Charging speed has the lowest average score among major aspects at 0.180, with a relatively high neutral share.
 - These patterns suggest that consumers may be generally satisfied with value, but more critical about durability, battery reliability, and charging performance.
 
 Paper insight:
@@ -159,18 +159,18 @@ Paper insight:
 
 VADER and contextual sentiment mostly agree when contextual sentiment is not mixed:
 
-- Non-mixed rows: 6,165.
-- Agreement rows: 5,648.
-- Agreement rate: 91.6%.
-- Disagreement rate: 8.4%.
+- Non-mixed rows: 6,396.
+- Agreement rows: 5,758.
+- Agreement rate: 90.0%.
+- Disagreement rate: 10.0%.
 
 Crosstab:
 
-| VADER Label | Context Mixed | Context Negative | Context Neutral | Context Positive |
-| --- | ---: | ---: | ---: | ---: |
-| negative | 52 | 861 | 0 | 100 |
-| neutral | 24 | 102 | 583 | 162 |
-| positive | 79 | 147 | 6 | 4,204 |
+| VADER Label | Context Negative | Context Neutral | Context Positive |
+| --- | ---: | ---: | ---: |
+| negative | 921 | 0 | 106 |
+| neutral | 173 | 589 | 192 |
+| positive | 155 | 12 | 4,248 |
 
 Interpretation:
 
@@ -206,8 +206,8 @@ Recommended paper wording:
 
 The dataset contains mismatches between star ratings and aspect sentiment:
 
-- High rating, negative or mixed aspect rows: 226 rows across 181 unique reviews.
-- Low rating, positive aspect rows: 320 rows across 275 unique reviews.
+- High rating, negative or mixed aspect rows: 239 rows across 191 unique reviews.
+- Low rating, positive aspect rows: 335 rows across 283 unique reviews.
 
 Interpretation:
 
@@ -250,10 +250,10 @@ Rules pipeline:
 LLM pipeline:
 
 - Smaller sample due to cost.
-- 100 unique reviews.
-- 2 products.
-- 113 aspect rows.
-- 20 aspect types.
+- 300 unique reviews.
+- 61 products.
+- 375 aspect rows.
+- 59 aspect types.
 - Better at nuanced classifications and more specific aspect labels.
 
 Interpretation:
@@ -264,11 +264,11 @@ Interpretation:
 
 Important limitation:
 
-The current LLM sample is not stratified. It covers only 2 products because the first 100 raw master reviews were processed. The paper should avoid making broad LLM-only claims across all 98 products. A future improvement would sample reviews across product categories and rating levels.
+The current LLM sample is stratified across product names and star ratings, but it is still a sample rather than a full LLM pass over all 4,964 reviews. The paper can use it to discuss contextual reasoning and qualitative differences, while the full rules run remains the main source for broad market-level counts.
 
 Recommended future-work wording:
 
-> Future experiments should use stratified LLM sampling across product types, star ratings, and review dates to make contextual LLM results more representative of the entire scraped dataset.
+> Future experiments should expand from a 300-review stratified LLM sample to a larger or full-dataset LLM run, budget permitting, and should compare sample stability across product types, star ratings, and review dates.
 
 Implementation note:
 
@@ -285,7 +285,7 @@ python scripts/merge_processed.py \
   --publish-latest
 ```
 
-After this run, regenerate this analysis because LLM coverage, aspect counts, and VADER/contextual comparisons will change.
+This run has now been completed on the VPS. The production latest file merges the full rules output with `data/processed/jumia_reviews_processed_llm_stratified_sample_llm.csv`.
 
 ## Consumer Behavior Insights
 
@@ -303,12 +303,12 @@ The analysis suggests the following consumer behavior patterns in the Jumia Nige
 
 The results can be written in this order:
 
-1. Present the dataset size: 4,964 reviews, 98 products, 6,320 aspect rows.
-2. Explain that the dataset combines a full rules-based run and a 100-review LLM sample.
+1. Present the dataset size: 4,964 reviews, 98 products, 6,582 aspect rows.
+2. Explain that the dataset combines a full rules-based run and a 300-review stratified LLM sample.
 3. Show overall sentiment distribution, emphasizing the dominance of positive sentiment but presence of negative/mixed rows.
 4. Discuss top aspects: general product experience, battery life, product performance, build quality, charging speed, price value.
 5. Analyze aspect-specific sentiment and identify battery life/build quality/charging speed as key areas of dissatisfaction.
-6. Compare VADER and contextual sentiment, noting 91.6% agreement on non-mixed rows but important disagreement examples.
+6. Compare VADER and contextual sentiment, noting 90.0% agreement on non-mixed rows but important disagreement examples.
 7. Discuss star-rating mismatch examples to show why aspect-based analytics is necessary.
 8. Conclude that the multi-agent framework improves interpretability by converting unstructured reviews into aspect-level evidence.
 
@@ -332,7 +332,7 @@ Recommended tables:
 
 ## Cautions for the Paper
 
-- Do not claim the LLM output covers the entire scraped dataset. It is a 100-review sample.
+- Do not claim the LLM output covers the entire scraped dataset. It is a 300-review stratified sample.
 - Do not claim demographic behavior because reviewer demographics are unavailable.
 - Do not overgeneralize from Jumia Nigeria to all e-commerce platforms without framing it as a case study.
 - Do not treat rules and LLM outputs as identical methods. They serve different methodological roles.
@@ -340,4 +340,4 @@ Recommended tables:
 
 ## One-Paragraph Result Summary
 
-The deployed system processed 4,964 unique Jumia Nigeria mobile accessories reviews into 6,320 aspect-level sentiment rows across 98 products. The merged dashboard dataset combines a broad rules-based run with a smaller 100-review LLM sample. Overall sentiment was predominantly positive, but aspect-level analysis exposed meaningful dissatisfaction around battery life, build quality, and charging speed. Price value was the most positively perceived major aspect, while build quality had the highest negative share among high-volume aspects. VADER agreed with contextual sentiment on 91.6% of non-mixed rows, but failed to represent mixed opinions and sometimes misread context-dependent phrases. Star-rating comparison showed that 181 high-rated reviews still contained negative or mixed aspect-level feedback, confirming that aggregate ratings alone are insufficient for consumer behavior analytics.
+The deployed system processed 4,964 unique Jumia Nigeria mobile accessories reviews into 6,582 aspect-level sentiment rows across 98 products. The merged dashboard dataset combines a broad rules-based run with a 300-review stratified LLM sample. Overall sentiment was predominantly positive, but aspect-level analysis exposed meaningful dissatisfaction around battery life, build quality, and charging speed. Price value was the most positively perceived major aspect, while build quality had the highest negative share among high-volume aspects. VADER agreed with contextual sentiment on 90.0% of non-mixed rows, but failed to represent mixed opinions and sometimes misread context-dependent phrases. Star-rating comparison showed that 191 high-rated reviews still contained negative or mixed aspect-level feedback, confirming that aggregate ratings alone are insufficient for consumer behavior analytics.
